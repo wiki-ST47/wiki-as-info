@@ -1,0 +1,177 @@
+{% extends 'base.html' %}
+{% block title %}Search Results{% endblock %}
+{% block content %}
+  {% include 'as_info/search_form.html' with form=form %}
+
+  <textarea id="holding"></textarea>
+
+  <div class="table-controls">
+    Blocked Ranges
+    <div class="btn-group btn-group-toggle" data-toggle="buttons">
+      <label class="btn btn-primary active">
+        <input type="radio" name="show-blocked" id="show" checked>Show
+      </label>
+      <label class="btn btn-primary">
+        <input type="radio" name="show-blocked" id="hide">Hide
+      </label>
+    </div>
+  </div>
+
+  <table class="table">
+    <thead>
+      <tr>
+        <th scope="col"></th>
+        <th scope="col" colspan="2">Prefix</th>
+        <th scope="col">Net/Org</th>
+        <th scope="col">Blocked?</th>
+        <th scope="col">Block Log</th>
+        <th scope="col">Contribs</th>
+        <th scope="col">Latest Edit</th>
+        <th scope="col">Block</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for prefix in prefixes %}
+        <tr class="
+          {% if prefix.block %}range-blocked{% else %}{% if prefix.block_aggregate %}range-blocked-aggregate{% else %}range-unblocked{% endif %}{% endif %}
+          {% if prefix.block or prefix.block_aggregate %}main-range-blocked{% endif %}
+        ">
+          <td>
+            <input type="checkbox" class="form-control row-block-checkbox" data-checked="{{ prefix.prefix }} {% if prefix.block %}blocked{% else %}not blocked{% endif %} - AS{% if prefix.asn %}{{ prefix.asn }}{% endif %} -> {{ prefix.asnorgname }} Whois: {{ prefix.net }}" {% if prefix.block %}{% else %}{% if prefix.block_aggregate %}{% else %}checked{% endif %}{% endif %}>
+          </td>
+          </td>
+          <td colspan="2">
+            <a href="{{ indexphp }}?title=Special:Contributions/{{ prefix.prefix }}">
+              {{ prefix.prefix }}
+            </a><br>
+            {% if prefix.route %}
+              AS{{ prefix.asn }}{% if prefix.asnorgname %} ({{ prefix.asnorgname }}){% endif %}
+            {% endif %}
+            {% if prefix.sub_prefixes %}
+              Aggregated prefix, see advertised prefixes below.
+            {% endif %}
+          </td>
+          <td>
+            {{ prefix.net }}<br>
+            {{ prefix.org }}
+          </td>
+          <td>
+            {% if prefix.block %}
+              Yes
+              {% if prefix.blockAO %}
+                AO
+              {% endif %}
+              {% if not prefix.blockACB %}
+                AC Enabled
+              {% endif %}
+            {% else %}
+              {% if prefix.block_aggregate %}
+                All subranges blocked
+              {% else %}
+                No
+              {% endif %}
+            {% endif %}
+          </td>
+          <td>
+            <a href="{{ indexphp }}?title=Special:Log/block&page=User:{{ prefix.prefix }}">
+              {% if prefix.blocklog %}
+                {{ prefix.blocks }} blocks, {{ prefix.unblocks }} unblocks
+              {% else %}
+                No block log
+              {% endif %}
+          </td>
+          <td>{{ prefix.contribs }}</td>
+          <td>{{ prefix.latest_contrib }}</td>
+          <td>
+            <a href="{{ indexphp }}?title=Special:Block/{{ prefix.prefix }}&wpExpiry=1 year&wpHardBlock=1&wpReason=other&wpReason-other=%7B%7Bwebhostblock%7D%7D%20%3C!-- {{ prefix.net }} ({{ prefix.org }}{% if prefix.asn %}, AS{{ prefix.asn }}{% endif %}) --%3E">
+              1 YEAR
+            </a>
+          </td>
+        </tr>
+        {% for subprefix in prefix.sub_prefixes %}
+          <tr class="
+            {% if subprefix.block %}range-blocked{% else %}range-unblocked{% endif %}
+            {% if prefix.block or prefix.block_aggregate %}main-range-blocked{% endif %}
+          ">
+            <td>
+              <input type="checkbox" class="form-control row-block-checkbox" data-checked="{{ subprefix.prefix }} {% if subprefix.block %}blocked{% else %}not blocked{% endif %} - AS{% if subprefix.asn %}{{ subprefix.asn }}{% endif %} -> {{ subprefix.asnorgname }} Whois: {{ subprefix.net }}">
+            </td>
+            <td>
+              <span class="material-icons">
+                subdirectory_arrow_right
+              </span>
+            </td>
+            <td class="subrange">
+              <a href="{{ indexphp }}?title=Special:Contributions/{{ subprefix.prefix }}">
+                {{ subprefix.prefix }}
+              </a><br>
+              {% if subprefix.route %}
+                AS{{ subprefix.asn }}{% if subprefix.asnorgname %} ({{ subprefix.asnorgname }}){% endif %}
+              {% endif %}
+            </td>
+            <td>
+              {{ subprefix.net }}<br>
+              {{ subprefix.org }}
+            </td>
+            <td>
+              {% if subprefix.block %}
+                Yes
+                {% if subprefix.blockAO %}
+                  AO
+                {% endif %}
+                {% if not subprefix.blockACB %}
+                  AC Enabled
+                {% endif %}
+              {% else %}
+                No
+              {% endif %}
+            </td>
+            <td>
+              <a href="{{ indexphp }}?title=Special:Log/block&page=User:{{ subprefix.prefix }}">
+                {% if subprefix.blocklog %}
+                  {{ subprefix.blocks }} blocks, {{ subprefix.unblocks }} unblocks
+                {% else %}
+                  No block log
+                {% endif %}
+            </td>
+            <td><!--{{ subprefix.contribs }}--></td>
+            <td><!--{{ subprefix.latest_contrib }}--></td>
+            <td>
+              <a href="{{ indexphp }}?title=Special:Block/{{ subprefix.prefix }}&wpExpiry=1 year&wpHardBlock=1&wpReason=other&wpReason-other=%7B%7Bwebhostblock%7D%7D%20%3C!-- {{ subprefix.net }} ({{ subprefix.org }}, AS{{ subprefix.asn }}) --%3E">
+                1 YEAR
+              </a>
+            </td>
+          </tr>
+        {% endfor %}
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}
+
+{% block late_js %}
+  <script type="text/javascript">
+    $(function() {
+      function populateHolding() {
+        var contents = "";
+        Array.prototype.forEach.call($("input.row-block-checkbox:checked"), function(item) {
+          contents += $(item).attr('data-checked');
+          contents += "\n";
+        });
+        $('#holding').val(contents);
+      }
+      $("input.row-block-checkbox").change(populateHolding);
+      populateHolding();
+
+      function updateFilters() {
+        var selected = $("input[name=show-blocked]:checked").attr('id');
+        if (selected == 'show') {
+          $(".main-range-blocked").show();
+        } else {
+          $(".main-range-blocked").hide();
+        }
+      }
+      $("input[name=show-blocked]").change(updateFilters);
+      updateFilters();
+    });
+  </script>
+{% endblock %}

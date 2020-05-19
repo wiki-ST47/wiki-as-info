@@ -1,0 +1,19 @@
+{
+  "name": "wiki-as-info",
+  "version": "1.0.0",
+  "description": "",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wiki-ST47/wiki-as-info.git"
+  },
+  "author": "",
+  "bugs": {
+    "url": "https://github.com/wiki-ST47/wiki-as-info/issues"
+  },
+  "homepage": "https://github.com/wiki-ST47/wiki-as-info#readme",
+  "dependencies": {
+    "jquery": "^3.3.1",
+    "popper.js": "^1.14.7",
+    "bootstrap": "^4.3.1"
+  }
+}

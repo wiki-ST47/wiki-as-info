@@ -1,0 +1,35 @@
+<form action="{% url 'search' %}" method="get" autocomplete="off">
+  {% if form.errors %}
+    <p class="form-error">Please correct the error(s) below:</p>
+    <ul>
+      {% for error in form.non_field_errors %}
+      <li class="form-error">{{ error }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+  <div class="form-row">
+    {% with form.wiki_url as this_field %}
+      <div class="form-group col-md-4">
+        <label for="id_{{ this_field.html_name }}">{{ this_field.label }}</label>
+        {% if this_field.errors %}<span class="form-error">{% for error in this_field.errors %}{{ error }}{% if not forloop.last %}<br>{% endif %}{% endfor %}</span>{% endif %}
+        <input type="text" class="form-control" name="{{ this_field.html_name }}" id="id_{{ this_field.html_name }}" {% if this_field.value %}value="{{ this_field.value }}"{% endif %} placeholder="en.wikipedia.org">
+        <small class="form-text text-muted">Defaults to the English Wikipedia.</small>
+      </div>
+    {% endwith %}
+    {% with form.ip as this_field %}
+      <div class="form-group col-md-4">
+        <label for="id_{{ this_field.html_name }}">{{ this_field.label }}</label>
+        {% if this_field.errors %}<span class="form-error">{% for error in this_field.errors %}{{ error }}{% if not forloop.last %}<br>{% endif %}{% endfor %}</span>{% endif %}
+        <input type="text" class="form-control" name="{{ this_field.html_name }}" id="id_{{ this_field.html_name }}" {% if this_field.value %}value="{{ this_field.value }}"{% endif %}>
+      </div>
+    {% endwith %}
+    {% with form.asn as this_field %}
+      <div class="form-group col-md-4">
+        <label for="id_{{ this_field.html_name }}">{{ this_field.label }}</label>
+        {% if this_field.errors %}<span class="form-error">{% for error in this_field.errors %}{{ error }}{% if not forloop.last %}<br>{% endif %}{% endfor %}</span>{% endif %}
+        <input type="text" class="form-control" name="{{ this_field.html_name }}" id="id_{{ this_field.html_name }}" {% if this_field.value %}value="{{ this_field.value }}"{% endif %}>
+      </div>
+    {% endwith %}
+  </div>
+  <button type="submit" class="btn btn-primary">Search</button>
+</form>
