@@ -14,7 +14,7 @@ import urllib.parse
 
 
 def run_whois(prefix, whois):
-    cmd = f"whois {prefix['prefix']}"
+    cmd = "%s %s" % (settings.WHOIS_PATH, prefix['prefix'],)
     result = subprocess.run(cmd.split(' '), stdout=subprocess.PIPE)
     stdout = result.stdout.decode("latin-1")
     route = re.findall("route6?:\s+(\S+)", stdout)
@@ -32,10 +32,10 @@ def run_whois(prefix, whois):
     if not org and not net:
         # Try again without prefix size
         firstip = prefix['prefix'][0]
-        cmd = f"whois {prefix['prefix'][0]}"
+        cmd = "%s %s" % (settings.WHOIS_PATH, prefix['prefix'][0],)
         result = subprocess.run(cmd.split(' '), stdout=subprocess.PIPE)
         stdout = result.stdout.decode("latin-1")
-        key = f"{prefix['prefix'][0]} - {prefix['prefix'][-1]}"
+        key = "%s - %s" % (prefix['prefix'][0], prefix['prefix'][-1])
         if key in stdout or str(prefix['prefix']) in stdout:
             route = re.findall("route6?:\s+(\S+)", stdout)
             if route:
@@ -123,7 +123,7 @@ def search(request):
             if '/' in ip_address:
                 # Input validation
                 ip_network = ipaddress.ip_network(ip_address).compressed
-                cmd = "whois "+ip_address
+                cmd = "%s %s" % (settings.WHOIS_PATH, ip_address,)
                 result = subprocess.run(cmd.split(' '), stdout=subprocess.PIPE)
                 res = re.findall("origin:\s+AS(\d+)", result.stdout.decode("latin-1"))
                 if res:
@@ -133,7 +133,7 @@ def search(request):
             else:
                 # Input validation
                 ip_address = ipaddress.ip_address(ip_address).compressed
-                cmd = "whois "+ip_address
+                cmd = "%s %s" % (settings.WHOIS_PATH, ip_address)
                 result = subprocess.run(cmd.split(' '), stdout=subprocess.PIPE)
                 res = re.findall("origin:\s+AS(\d+)", result.stdout.decode("latin-1"))
                 if res:
@@ -272,7 +272,7 @@ def search(request):
                     if 'asn' in sub_prefix and sub_prefix['asn'] and sub_prefix['asn'] not in asnlist:
                         asnlist.append(sub_prefix['asn'])
         for asn in asnlist:
-            cmd = f"whois AS{asn}"
+            cmd = "%s AS%s" % (settings.WHOIS_PATH, asn,)
             result = subprocess.run(cmd.split(' '), stdout=subprocess.PIPE)
             stdout = result.stdout.decode("latin-1")
             orgname = re.findall("org-name:\s+(.+)", stdout)
