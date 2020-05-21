@@ -10,4 +10,5 @@ urlpatterns = [
     path('docs/', as_info.views.docs, name='docs'),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('search/', as_info.views.search, name='search'),
+    path('tools/', as_info.views.tools, name='tools'),
 ]

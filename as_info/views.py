@@ -68,6 +68,11 @@ def docs(request):
     return render(request, 'docs.html', context)
 
 
+def tools(request):
+    context = {}
+    return render(request, 'tools.html', context)
+
+
 def search(request):
     context = {}
     form = SearchForm(request.GET)
