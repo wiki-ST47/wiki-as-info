@@ -14,7 +14,7 @@ import urllib.parse
 
 
 def run_whois(prefix, whois):
-    cmd = "%s %s" % (settings.WHOIS_PATH, prefix['prefix'],)
+    cmd = "%s -r %s" % (settings.WHOIS_PATH, prefix['prefix'],)
     result = subprocess.run(cmd.split(' '), stdout=subprocess.PIPE)
     stdout = result.stdout.decode("latin-1")
     route = re.findall("route6?:\s+(\S+)", stdout)
@@ -32,7 +32,7 @@ def run_whois(prefix, whois):
     if not org and not net:
         # Try again without prefix size
         firstip = prefix['prefix'][0]
-        cmd = "%s %s" % (settings.WHOIS_PATH, prefix['prefix'][0],)
+        cmd = "%s -r %s" % (settings.WHOIS_PATH, prefix['prefix'][0],)
         result = subprocess.run(cmd.split(' '), stdout=subprocess.PIPE)
         stdout = result.stdout.decode("latin-1")
         key = "%s - %s" % (prefix['prefix'][0], prefix['prefix'][-1])
